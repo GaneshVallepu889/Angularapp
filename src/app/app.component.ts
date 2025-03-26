@@ -1,59 +1,53 @@
 import { Component } from '@angular/core';
- 
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
-import { Form, FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { StudentsService } from './students.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule,FormsModule], 
+  standalone: true,
+  imports: [CommonModule, FormsModule,StudentsService], 
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'] 
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Helloworld';
-  editT: boolean = false;
-  selectedStudent: any = null; 
-  
-  students = [
-    { id:1,name: "asad", age: "31"},
-    { id:2,name: "ganesh", age: "33" },
-    { id:3,name: "kiran", age: "23" },
-    { id:4,name: "anjith", age: "21"}
-  ];
+  title = 'Student Management';
+  newStudent = { id: '', name: '', age: '' };
+  students: any[] = []; 
+  edit = false;
+  selectedStudent: any = null;
 
-  toggle: boolean = true;
-
-  ToggleTheButton() {
-    this.toggle = !this.toggle;
+  constructor(private studentService: StudentsService) {
+    this.students = this.studentService.students; 
   }
 
-
-  editButton(student: any) {
-    this.editT = !this.editT;
-    this.selectedStudent = { ...student }; 
+  removeStudent(id: string) {
+    this.studentService.deleteStudent(id);
+    this.students = [...this.studentService.students]; 
   }
 
-
-  deleteStudent(name: string) {
-    this.students = this.students.filter(student => student.name !== name);
-  }
-
-
-  addStudent(id: any, name: any,age: any) {
-    if (id.value != null && name.value != null && age.value != null) {
-      this.students.push({ id: id.value, name: name.value, age: age.value });
+  insertStudent() {
+    if (this.newStudent.name && this.newStudent.age && this.newStudent.age) {
+      this.studentService.addStudent(
+        this.newStudent.id,
+        this.newStudent.name,
+        this.newStudent.age
+      );
+      this.students = [...this.studentService.students]; 
+      this.newStudent = { id: '', name: '', age: '' };
     }
+  }
+
+  selectStudent(student: any) {
+    this.selectedStudent = { ...student };
+    this.edit = true;
   }
 
   updateStudent() {
     if (this.selectedStudent) {
-     
-      const index = this.students.findIndex(student => student.name === this.selectedStudent.name);
-      if (index !== -1) {
-        this.students[index] =this.selectedStudent;
-      }
+      this.studentService.updateStudents();
+      this.students = [...this.studentService.students]; 
+      this.edit = false;
     }
-    this.editT = !this.editT;
   }
 }
